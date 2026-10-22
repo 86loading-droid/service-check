@@ -96,6 +96,32 @@ const r1 = x => x == null ? '–' : (Math.round(x * 10) / 10).toString();
 const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const when = t => { const d = new Date(t); return isNaN(d) ? t : d.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }); };
 
+/* 삭제: 한 번 누르면 확인 상태, 두 번째에 실제 삭제 */
+const SEL = new Set();
+function twoStep(btn, armedText, run) {
+  const orig = btn.textContent;
+  let armed = false, timer = null;
+  btn.addEventListener('click', async e => {
+    e.stopPropagation();
+    if (!armed) {
+      armed = true; btn.textContent = armedText; btn.classList.add('danger-armed');
+      timer = setTimeout(() => { armed = false; btn.textContent = orig; btn.classList.remove('danger-armed'); }, 5000);
+      return;
+    }
+    clearTimeout(timer); btn.disabled = true; btn.textContent = '지우는 중…';
+    try { await run(); } catch (err) { btn.disabled = false; armed = false; btn.textContent = orig; btn.classList.remove('danger-armed'); alertBox(err.message); }
+  });
+}
+function alertBox(msg) { const el = $('loaded-at'); if (el) el.textContent = msg; }
+async function removeChecks(ids) {
+  if (!ids.length) return;
+  const r = await api({ action: 'deleteChecks', pw: PW, ids });
+  for (const s of STUDENTS) if (s.checks.some(c => ids.includes(c.id))) SEL.delete(s.key);
+  await load();
+  alertBox(`점검 ${r.removed}건을 지웠습니다 · ` + $('loaded-at').textContent);
+  return r;
+}
+
 function renderAll() {
   renderKpis(); renderStudents(); renderReview(); renderTypes(); renderMajors(); renderSignals();
 }
@@ -144,19 +170,41 @@ function renderStudents() {
   });
   const head = COLS.map(([k, t, num]) => `<th class="${num ? 'num' : ''}" aria-sort="${sortKey === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button data-sort="${k}">${t}${sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : ''}</button></th>`).join('');
   const rows = S.map(s => `<tr class="clickable" data-key="${esc(s.key)}" tabindex="0">
-    <td>${esc(s.major)}</td><td>${esc(s.sid)}</td><td>${esc(s.name)}${s.same.length ? ' <span class="tag red" title="다른 학생과 같은 파일">같은 파일</span>' : ''}${s.flags ? ' <span class="tag amber">신호 ' + s.flags + '</span>' : ''}</td>
+    <td class="pick"><input type="checkbox" data-pick="${esc(s.key)}" aria-label="${esc(s.name)} 선택"${SEL.has(s.key) ? ' checked' : ''}></td><td>${esc(s.major)}</td><td>${esc(s.sid)}</td><td>${esc(s.name)}${s.same.length ? ' <span class="tag red" title="다른 학생과 같은 파일">같은 파일</span>' : ''}${s.flags ? ' <span class="tag amber">신호 ' + s.flags + '</span>' : ''}</td>
     <td class="num">${s.n}</td><td class="num">${s.firstErr}</td><td class="num">${s.lastErr}</td><td class="num">${pct(s.drop)}</td>
     <td class="num">${r1(s.firstScore)}</td><td class="num"><b>${r1(s.lastScore)}</b></td>
     <td>${s.lastMust ? '<span class="tag red">보완 필요</span>' : '<span class="tag green">요건 충족</span>'}</td>
     <td class="num">${s.reviews || ''}</td><td class="num">${r1(s.hours)}</td><td>${when(s.lastTime)}</td></tr>`).join('');
   $('panel-students').innerHTML = S.length
-    ? `<p class="note">줄을 누르면 점검 이력과 항목별 판정을 볼 수 있습니다. 점수는 확인 필요 칸을 감점하지 않은 값이며, 교수님 판정을 넣으면 바로 다시 계산됩니다.</p><div class="tablewrap"><table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`
+    ? `<p class="note">줄을 누르면 점검 이력과 항목별 판정을 볼 수 있습니다. 점수는 확인 필요 칸을 감점하지 않은 값이며, 교수님 판정을 넣으면 바로 다시 계산됩니다.</p><div class="delbar"><span id="sel-count"></span><button class="ghost danger" id="del-selected" type="button">선택한 학생 기록 삭제</button></div><div class="tablewrap"><table><thead><tr><th class="pick"><input type="checkbox" id="pick-all" aria-label="모두 선택"></th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`
     : '<p>아직 점검한 학생이 없습니다. 학생 화면 주소를 안내하면 이곳에 기록이 쌓입니다.</p>';
   $('panel-students').querySelectorAll('[data-sort]').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.sort; if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = -1; }
     renderStudents();
   }));
-  $('panel-students').querySelectorAll('tr[data-key]').forEach(tr => {
+  const P = $('panel-students');
+  const syncSel = () => {
+    const n = SEL.size, m = STUDENTS.filter(s => SEL.has(s.key)).reduce((a, s) => a + s.n, 0);
+    const cnt = $('sel-count'), del = $('del-selected'), all = $('pick-all');
+    if (!cnt) return;
+    cnt.textContent = n ? `${n}명 선택 · 점검 ${m}건` : '지울 학생을 고르세요. 시험 기록 정리용입니다.';
+    del.disabled = !n;
+    all.checked = n > 0 && n === STUDENTS.length; all.indeterminate = n > 0 && n < STUDENTS.length;
+  };
+  P.querySelectorAll('[data-pick]').forEach(cb => {
+    cb.addEventListener('click', e => e.stopPropagation());
+    cb.addEventListener('keydown', e => e.stopPropagation());
+    cb.addEventListener('change', () => { cb.checked ? SEL.add(cb.dataset.pick) : SEL.delete(cb.dataset.pick); syncSel(); });
+  });
+  const all = $('pick-all');
+  if (all) all.addEventListener('change', () => {
+    SEL.clear(); if (all.checked) STUDENTS.forEach(s => SEL.add(s.key));
+    P.querySelectorAll('[data-pick]').forEach(cb => { cb.checked = all.checked; }); syncSel();
+  });
+  const del = $('del-selected');
+  if (del) twoStep(del, '한 번 더 누르면 삭제됩니다', () => removeChecks(STUDENTS.filter(s => SEL.has(s.key)).flatMap(s => s.checks.map(c => c.id))));
+  syncSel();
+  P.querySelectorAll('tr[data-key]').forEach(tr => {
     tr.addEventListener('click', () => openDetail(tr.dataset.key));
     tr.addEventListener('keydown', e => { if (e.key === 'Enter') openDetail(tr.dataset.key); });
   });
@@ -257,7 +305,8 @@ function openDetail(key) {
     const st = STUDENTS.find(x => x.key === key) || s;
     const c = st.checks[st.checks.length - 1];
     $('detail-h').textContent = `${st.name} · ${st.major} ${st.sid}`;
-    const hist = `<div class="tablewrap"><table><thead><tr><th>차례</th><th>시각</th><th class="num">오류</th><th class="num">확인 필요</th><th class="num">환산 점수</th><th class="num">인정 시간</th><th class="num">쪽수</th></tr></thead><tbody>${st.checks.map(x => `<tr><td>${x.no}</td><td>${when(x.time)}</td><td class="num">${x.sum.errors}</td><td class="num">${x.sum.reviews}</td><td class="num">${r1(x.sum.score)}</td><td class="num">${r1(x.hours)}</td><td class="num">${x.pages}</td></tr>`).join('')}</tbody></table></div>`;
+    const hist = `<div class="tablewrap"><table><thead><tr><th>차례</th><th>시각</th><th class="num">오류</th><th class="num">확인 필요</th><th class="num">환산 점수</th><th class="num">인정 시간</th><th class="num">쪽수</th><th></th></tr></thead><tbody>${st.checks.map(x => `<tr><td>${x.no}</td><td>${when(x.time)}</td><td class="num">${x.sum.errors}</td><td class="num">${x.sum.reviews}</td><td class="num">${r1(x.sum.score)}</td><td class="num">${r1(x.hours)}</td><td class="num">${x.pages}</td><td><button class="ghost danger small" type="button" data-del="${esc(x.id)}">삭제</button></td></tr>`).join('')}</tbody></table></div>
+      <div class="delbar"><span class="note">시험 기록이면 지울 수 있습니다. 지운 기록은 되돌릴 수 없습니다.</span><button class="ghost danger" type="button" id="del-student">이 학생 기록 모두 삭제</button></div>`;
     const byCat = Object.entries(CATS).map(([k, v]) => `${v.name} ${r1(c.sum.byCat[k])}/${v.max}`).join(' · ');
     const items = `<div class="tablewrap"><table><thead><tr><th>판정</th><th>항목</th><th>내용</th><th class="num">감점</th><th>교수 판정</th></tr></thead><tbody>${(c.items || []).filter(it => it.pts > 0 || it.status !== 'ok').map(it => {
       const e = eff(c, it);
@@ -269,6 +318,13 @@ function openDetail(key) {
       ${(c.flags || []).map(f => `<p class="notice">${f.page}쪽 · ${esc(f.kind)}: ${esc(f.detail)}</p>`).join('')}
       ${items}`;
     bindJudge($('detail-body'), draw);
+    $('detail-body').querySelectorAll('[data-del]').forEach(b => twoStep(b, '삭제 확인', async () => {
+      await removeChecks([b.dataset.del]);
+      if (STUDENTS.some(x => x.key === key)) draw(); else $('detail').close();
+    }));
+    twoStep($('del-student'), '한 번 더 누르면 모두 삭제됩니다', async () => {
+      await removeChecks(st.checks.map(x => x.id)); $('detail').close();
+    });
   };
   draw();
   $('detail').showModal();
@@ -284,7 +340,7 @@ document.querySelectorAll('[role="tab"]').forEach(t => t.addEventListener('click
 /* 내려받기 */
 function csv(rows) {
   const q = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-  return '\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n');
+  return '﻿' + rows.map(r => r.map(q).join(',')).join('\r\n');
 }
 function download(name, text) {
   const a = document.createElement('a');

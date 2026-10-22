@@ -174,3 +174,13 @@ dialog .body { padding: 16px 18px 22px; max-height: 75vh; overflow: auto; }
   .masthead { flex-direction: column; align-items: flex-start; }
 }
 @media print { .actions, .tabs, button { display: none !important; } }
+
+/* 삭제 */
+.delbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 0 10px; font-size: 0.9rem; color: var(--ink-soft); }
+.delbar .note { margin: 0; }
+dialog .delbar { margin: 12px 0 18px; }
+button.danger { color: var(--seal); border-color: var(--seal); padding: 7px 14px; font-size: 0.9rem; }
+button.danger.small { padding: 3px 10px; font-size: 0.82rem; border-width: 1px; }
+button.danger.danger-armed { background: var(--seal); color: #fff; }
+th.pick, td.pick { width: 2.4rem; text-align: center; padding-right: 0; }
+td.pick input, th.pick input { width: 1.05rem; height: 1.05rem; accent-color: var(--seal); cursor: pointer; }
