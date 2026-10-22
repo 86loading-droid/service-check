@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>봉사 보고서 점검</title>
+<meta name="description" content="지역사회봉사 최종보고서를 제출하기 전에 빠진 칸, 날인, 20시간 증빙을 스스로 점검합니다.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%23c8262e' stroke-width='3'/%3E%3Cpath d='M10 16l4 4 8-9' fill='none' stroke='%23c8262e' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="app.css?v=1.0.0">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" defer></script>
+<script type="module" src="student.js?v=1.0.0"></script>
+</head>
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<div class="wrap">
+  <header class="masthead">
+    <div>
+      <h1>지역사회봉사 최종보고서 점검</h1>
+      <p>제출하기 전에 빈칸, 기관 날인, 20시간 증빙을 확인합니다.</p>
+    </div>
+    <span class="term">위덕대학교 · 지역사회봉사</span>
+  </header>
+
+  <main id="main">
+    <!-- 1. 입장 -->
+    <section id="step-enter" aria-labelledby="enter-h">
+      <h2 id="enter-h" class="sr" style="position:absolute;left:-999px">입장</h2>
+      <form id="enter-form" class="sheet formgrid" novalidate>
+        <label for="major">전공</label>
+        <div class="val">
+          <select id="major" required>
+            <option value="">전공을 고르세요</option>
+            <option>사회복지학과</option>
+            <option>원전제어시스템공학과</option>
+            <option>전기공학전공</option>
+            <option>전력시스템공학과</option>
+            <option>특수교육</option>
+          </select>
+        </div>
+        <label for="sid">학번</label>
+        <div class="val"><input id="sid" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="15" placeholder="예: 26B3006" required></div>
+        <label for="sname">이름</label>
+        <div class="val"><input id="sname" autocomplete="name" maxlength="20" placeholder="이름" required></div>
+      </form>
+      <p class="err" id="enter-err" role="alert"></p>
+      <div class="actions"><button type="submit" form="enter-form" id="enter-btn">점검 시작하기</button></div>
+      <p class="hint">점검 횟수와 고칠 곳의 수만 기록됩니다. 보고서 파일은 이 기기 안에서만 읽고 어디에도 올리지 않습니다.</p>
+    </section>
+
+    <!-- 2. 올리기 -->
+    <section id="step-upload" hidden aria-labelledby="up-h">
+      <div class="who"><span><b id="who-name"></b> · <span id="who-meta"></span></span><button class="linkbtn" id="change-who" type="button">입장 정보 바꾸기</button></div>
+      <h2 id="up-h" style="font-size:1.2rem;margin:0 0 4px">최종보고서 PDF를 올려 주세요</h2>
+      <p class="hint" style="margin-top:0">표지부터 1365 확인서까지 한 파일로 묶은 PDF만 점검할 수 있습니다.</p>
+      <label class="drop" id="drop" tabindex="0">
+        <strong>PDF 파일 고르기</strong>
+        <span>여기로 끌어다 놓아도 됩니다</span>
+        <input type="file" id="file" accept="application/pdf,.pdf" hidden>
+      </label>
+      <p class="err" id="up-err" role="alert"></p>
+      <div class="progress" id="progress" hidden aria-live="polite">
+        <div class="bar"><i id="bar"></i></div>
+        <p id="progress-text">준비하고 있습니다</p>
+        <p class="hint">처음 한 번은 글자 읽기 도구를 내려받느라 조금 더 걸립니다. 쪽마다 몇 초씩 걸리니 창을 닫지 말아 주세요.</p>
+      </div>
+    </section>
+
+    <!-- 3. 결과 -->
+    <section id="step-result" hidden aria-labelledby="res-h">
+      <div class="who"><span><b id="who-name2"></b> · <span id="file-name"></span></span><button class="linkbtn" id="again-top" type="button">다른 파일 점검</button></div>
+      <div class="sheet verdict">
+        <div>
+          <h2 id="res-h"></h2>
+          <p id="res-sub"></p>
+        </div>
+        <div class="stamp" id="stamp" aria-hidden="true"></div>
+      </div>
+      <div id="feedback"></div>
+      <div id="groups"></div>
+      <div class="actions">
+        <button id="again" type="button">고친 파일로 다시 점검</button>
+        <button id="print" type="button" class="ghost">점검 결과 인쇄</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="small">
+    자동 점검은 스캔 상태에 따라 틀릴 수 있습니다. 「확인 중」으로 표시된 칸은 교수님이 직접 확인합니다.
+    헌혈은 장수와 관계없이 4시간까지만 봉사시간으로 인정합니다.
+  </footer>
+</div>
+</body>
+</html>
