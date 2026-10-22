@@ -76,7 +76,8 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* 올리기 */
 .drop {
-  margin-top: 8px; border: 2px dashed var(--rule-strong); background: var(--sheet); padding: 40px 20px; text-align: center; cursor: pointer;
+  display: block; width: 100%;
+  margin-top: 12px; border: 2px dashed var(--rule-strong); background: var(--sheet); padding: 40px 20px; text-align: center; cursor: pointer;
 }
 .drop.over { border-color: var(--pen); background: var(--field); }
 .drop strong { display: block; font-size: 1.15rem; margin-bottom: 6px; }
