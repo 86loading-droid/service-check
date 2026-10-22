@@ -151,7 +151,7 @@ $('enter-form').addEventListener('submit', e => {
   const major = $('major').value;
   const sid = $('sid').value.trim().toUpperCase();
   // 베트남어 성조 부호는 떼고 기록한다(학적부 영문 표기와 맞추고 학생 구분을 흔들지 않기 위해)
-  const name = $('sname').value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').trim().replace(/\s+/g, ' ');
+  const name = $('sname').value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').normalize('NFC').replace(/đ/g, 'd').replace(/Đ/g, 'D').trim().replace(/\s+/g, ' ');
   const err = $('enter-err');
   if (!MAJORS.includes(major)) { err.textContent = L().errMajor; $('major').focus(); return; }
   if (!/^[0-9A-Z]{4,15}$/.test(sid)) { err.textContent = L().errSid; $('sid').focus(); return; }
