@@ -110,7 +110,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .group { margin-top: 26px; }
 .group h3 { font-size: 1.05rem; margin: 0 0 8px; display: flex; justify-content: space-between; gap: 8px; }
-.group h3 small { font-weight: 500; color: var(--ink-soft); }
+.group h3 small { font-weight: 500; color: var(--ink-soft); white-space: nowrap; }
 .rows { list-style: none; margin: 0; padding: 0; background: var(--sheet); border: 1px solid var(--rule-strong); }
 .rows li { display: grid; grid-template-columns: 4.8rem 1fr; border-bottom: 1px solid var(--rule); }
 .rows li:last-child { border-bottom: 0; }
@@ -174,6 +174,8 @@ dialog .body { padding: 16px 18px 22px; max-height: 75vh; overflow: auto; }
   .masthead { flex-direction: column; align-items: flex-start; }
 }
 @media print { .actions, .tabs, button { display: none !important; } }
+}
+@media print { .actions, .tabs, button { display: none !important; } }
 
 /* 삭제 */
 .delbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 0 10px; font-size: 0.9rem; color: var(--ink-soft); }
@@ -184,3 +186,13 @@ button.danger.small { padding: 3px 10px; font-size: 0.82rem; border-width: 1px; 
 button.danger.danger-armed { background: var(--seal); color: #fff; }
 th.pick, td.pick { width: 2.4rem; text-align: center; padding-right: 0; }
 td.pick input, th.pick input { width: 1.05rem; height: 1.05rem; accent-color: var(--seal); cursor: pointer; }
+
+/* 언어 고르기 */
+.mast-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.langs { display: inline-flex; border: 1px solid var(--rule-strong); }
+.langs button { white-space: nowrap; background: transparent; color: var(--ink-soft); border: 0; border-radius: 0; padding: 5px 12px; font-size: 0.85rem; font-weight: 600; }
+.langs button + button { border-left: 1px solid var(--rule-strong); }
+.langs button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+.stamp.long { font-size: 0.92rem; letter-spacing: 0.02em; padding: 0 8px; }
+@media (max-width: 560px) { .mast-side { flex-direction: row-reverse; justify-content: space-between; align-items: center; width: 100%; } }
+@media print { .langs { display: none !important; } }
