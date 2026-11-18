@@ -196,3 +196,29 @@ td.pick input, th.pick input { width: 1.05rem; height: 1.05rem; accent-color: va
 .stamp.long { font-size: 0.92rem; letter-spacing: 0.02em; padding: 0 8px; }
 @media (max-width: 560px) { .mast-side { flex-direction: row-reverse; justify-content: space-between; align-items: center; width: 100%; } }
 @media print { .langs { display: none !important; } }
+
+/* 입장 구분(학생 점검 · 교수 현황) — 두 화면 공통 */
+.masthead { margin-bottom: 0; }
+.roles { display: flex; gap: 0; margin: 0 0 28px; border-bottom: 1px solid var(--rule); }
+.roles a { padding: 11px 18px 9px; font-weight: 700; font-size: 0.95rem; color: var(--ink-soft); text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.roles a:hover { color: var(--ink); }
+.roles a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--seal); }
+.roles a:focus-visible { outline: 2px solid var(--seal); outline-offset: -2px; }
+.prof-head { margin: 0 0 18px; }
+.prof-head h2 { margin: 0; font-size: 1.25rem; letter-spacing: -0.02em; }
+.prof-head p { margin: 4px 0 0; color: var(--ink-soft); font-size: 0.92rem; }
+.prof-only { margin: -12px 0 20px; }
+details.privacy { margin-top: 10px; font-size: 0.88rem; color: var(--ink-soft); }
+details.privacy summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+details.privacy ul { margin: 8px 0 0; padding-left: 1.1rem; }
+details.privacy li { margin: 4px 0; line-height: 1.55; }
+details.privacy li b { color: var(--ink); margin-right: 4px; }
+.ver { margin: 8px 0 0; color: var(--ink-soft); font-size: 0.78rem; }
+@media print { .roles, details.privacy, .ver { display: none !important; } }
+/* 두 화면 머리말 폭을 같게: 바깥 틀은 넓게, 학생 점검 본문은 읽기 좋은 폭으로 */
+main.narrow { max-width: 780px; }
+@media (max-width: 560px) {
+  .mast-side { flex-wrap: wrap; row-gap: 6px; }
+  .mast-side .term { white-space: normal; }
+  .roles a { padding: 10px 12px 8px; }
+}

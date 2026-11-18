@@ -7,28 +7,32 @@
 <meta name="description" content="지역사회봉사 최종보고서를 제출하기 전에 빠진 칸, 날인, 20시간 증빙을 스스로 점검합니다.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%23c8262e' stroke-width='3'/%3E%3Cpath d='M10 16l4 4 8-9' fill='none' stroke='%23c8262e' stroke-width='3'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="app.css?v=1.0.4">
+<link rel="stylesheet" href="app.css?v=1.0.5">
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" defer></script>
-<script type="module" src="student.js?v=1.0.4"></script>
+<script type="module" src="student.js?v=1.0.5"></script>
 </head>
 <body>
-<a class="skip" href="#main" data-t="skip">본문으로 건너뛰기</a>
-<div class="wrap">
+<a class="skip" href="#main" data-s="skip">본문으로 건너뛰기</a>
+<div class="wrap wide">
   <header class="masthead">
     <div>
-      <h1 data-t="h1">지역사회봉사 최종보고서 점검</h1>
-      <p data-t="lede">제출하기 전에 빈칸, 기관 날인, 20시간 증빙을 확인합니다.</p>
+      <h1 data-s="h1">지역사회봉사 최종보고서 점검</h1>
+      <p data-s="lede">제출하기 전에 빈칸, 기관 날인, 20시간 증빙을 확인합니다.</p>
     </div>
     <div class="mast-side">
       <div class="langs" role="group" aria-label="언어 · Ngôn ngữ">
         <button type="button" data-lang="ko" lang="ko" aria-pressed="true">한국어</button>
         <button type="button" data-lang="vi" lang="vi" aria-pressed="false">Tiếng Việt</button>
       </div>
-      <span class="term" data-t="term">위덕대학교 · 지역사회봉사</span>
+      <span class="term" data-s="term">위덕대학교 · 지역사회봉사</span>
     </div>
   </header>
+  <nav class="roles" aria-label="입장 구분">
+    <a data-href="./" href="./" aria-current="page" data-s="roleStudent">학생 점검</a>
+    <a data-href="admin.html" href="admin.html" data-s="roleProf">교수 현황</a>
+  </nav>
 
-  <main id="main">
+  <main id="main" class="narrow">
     <!-- 1. 입장 -->
     <section id="step-enter" aria-labelledby="enter-h">
       <h2 id="enter-h" class="sr" style="position:absolute;left:-999px">입장</h2>
@@ -51,7 +55,8 @@
       </form>
       <p class="err" id="enter-err" role="alert"></p>
       <div class="actions"><button type="submit" form="enter-form" id="enter-btn" data-t="start">점검 시작하기</button></div>
-      <p class="hint" data-t="enterHint">점검 횟수와 고칠 곳의 수만 기록됩니다. 보고서 파일은 이 기기 안에서만 읽고 어디에도 올리지 않습니다.</p>
+      <p class="hint" data-t="enterHint">보고서 파일은 이 기기 안에서만 읽고 어디에도 올리지 않습니다. 서버에는 아래 점검 기록만 남습니다.</p>
+      <details class="privacy"><summary data-t="privacyH">기록되는 내용 보기</summary><ul id="privacy-list"></ul></details>
     </section>
 
     <!-- 2. 올리기 -->
@@ -92,6 +97,7 @@
   </main>
 
   <footer class="small" data-t="footer">자동 점검은 스캔 상태에 따라 틀릴 수 있습니다. 「확인 중」으로 표시된 칸은 교수님이 직접 확인합니다. 헌혈은 장수와 관계없이 4시간까지만 봉사시간으로 인정합니다.</footer>
+  <p class="ver" id="app-ver"></p>
 </div>
 </body>
 </html>

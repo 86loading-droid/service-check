@@ -1,6 +1,7 @@
 import { API_URL, APP_VERSION } from './config.js';
 import { checkPdf, getWorker } from './checker.js';
 import { CATS } from './rules.js';
+import { getLang, onLang } from './shell.js';
 
 const $ = id => document.getElementById(id);
 const MAJORS = ['사회복지학과', '원전제어시스템공학과', '전기공학전공', '전력시스템공학과', '특수교육'];
@@ -19,13 +20,18 @@ let last = null; // 마지막 결과(언어를 바꾸면 다시 그린다)
 const TXT = {
   ko: {
     title: '봉사 보고서 점검',
-    h1: '지역사회봉사 최종보고서 점검',
-    lede: '제출하기 전에 빈칸, 기관 날인, 20시간 증빙을 확인합니다.',
-    term: '위덕대학교 · 지역사회봉사',
-    skip: '본문으로 건너뛰기',
     major: '전공', majorPick: '전공을 고르세요', sid: '학번', sname: '이름', sidPh: '예: 26B3006', namePh: '이름',
     start: '점검 시작하기',
-    enterHint: '점검 횟수와 고칠 곳의 수만 기록됩니다. 보고서 파일은 이 기기 안에서만 읽고 어디에도 올리지 않습니다.',
+    enterHint: '보고서 파일은 이 기기 안에서만 읽고 어디에도 올리지 않습니다. 서버에는 아래 점검 기록만 남습니다.',
+    privacyH: '기록되는 내용 보기',
+    privacy: [
+      ['기록하는 것', '전공, 학번, 이름, 점검한 시각과 횟수, 항목별 점검 결과(고칠 곳·확인 필요와 그 설명 문장, 읽어 낸 칸 내용 일부가 들어갈 수 있음), 읽어 낸 봉사시간과 쪽수, 같은 파일을 가려내기 위한 파일 지문(파일 내용으로 만든 고유 번호이며 이것으로 파일을 되살릴 수 없음)'],
+      ['기록하지 않는 것', '보고서 파일 자체와 그 안의 사진·서명 그림'],
+      ['쓰는 곳', '보고서 보완 지도, 이 점검 프로그램의 효과 확인(첫 점검과 마지막 점검 비교)'],
+      ['보는 사람', '담당 교수만 봅니다. 교수 화면에는 우수 보고서 선별용 환산 점수가 함께 계산되며, 이 점수는 학생에게 보이지 않습니다.'],
+      ['보관 기간', '이번 학기 성적 처리가 끝나면 지웁니다.'],
+      ['지우기', '담당 교수에게 요청하면 언제든 내 기록을 지웁니다.'],
+    ],
     changeWho: '입장 정보 바꾸기',
     upH: '최종보고서 PDF를 올려 주세요',
     upHint: '표지부터 1365 확인서까지 한 파일로 묶은 PDF만 점검할 수 있습니다.',
@@ -60,13 +66,18 @@ const TXT = {
   },
   vi: {
     title: 'Kiểm tra báo cáo tình nguyện',
-    h1: 'Kiểm tra báo cáo cuối kỳ hoạt động tình nguyện cộng đồng',
-    lede: 'Trước khi nộp, hãy kiểm tra ô trống, dấu của cơ quan và giấy chứng nhận 20 giờ.',
-    term: 'Đại học Uiduk · Tình nguyện cộng đồng',
-    skip: 'Chuyển đến nội dung chính',
     major: 'Ngành', majorPick: 'Chọn ngành của bạn', sid: 'Mã số SV', sname: 'Họ tên', sidPh: 'Ví dụ: 26B3006', namePh: 'Họ tên',
     start: 'Bắt đầu kiểm tra',
-    enterHint: 'Hệ thống chỉ lưu số lần kiểm tra và số chỗ cần sửa. File báo cáo chỉ được đọc trên thiết bị này và không được tải lên bất kỳ đâu.',
+    enterHint: 'File báo cáo chỉ được đọc trên thiết bị này và không được tải lên bất kỳ đâu. Máy chủ chỉ lưu lịch sử kiểm tra dưới đây.',
+    privacyH: 'Xem nội dung được lưu',
+    privacy: [
+      ['Được lưu', 'Ngành, mã số sinh viên, họ tên, thời điểm và số lần kiểm tra, kết quả từng mục (chỗ cần sửa, mục đang xác minh và câu giải thích; có thể gồm một phần nội dung ô đọc được), số giờ tình nguyện và số trang đọc được, dấu vân tay của file để nhận ra file trùng (một mã riêng tạo từ nội dung file, không thể dùng để khôi phục file)'],
+      ['Không lưu', 'Bản thân file báo cáo, ảnh và hình chữ ký trong file'],
+      ['Mục đích', 'Hướng dẫn sửa báo cáo và đánh giá hiệu quả của chương trình (so sánh lần kiểm tra đầu và lần cuối)'],
+      ['Người xem', 'Chỉ giảng viên phụ trách. Màn hình giảng viên có tính điểm quy đổi để chọn báo cáo xuất sắc; sinh viên không thấy điểm này.'],
+      ['Thời gian lưu', 'Xóa sau khi hoàn tất xử lý điểm học kỳ này.'],
+      ['Xóa', 'Bạn có thể yêu cầu giảng viên phụ trách xóa lịch sử của mình bất cứ lúc nào.'],
+    ],
     changeWho: 'Đổi thông tin',
     upH: 'Hãy tải lên file PDF báo cáo cuối kỳ',
     upHint: 'Chỉ kiểm tra được một file PDF gộp tất cả, từ trang bìa đến giấy xác nhận 1365.',
@@ -101,17 +112,11 @@ const TXT = {
   },
 };
 
-const pref = {
-  get() { try { return localStorage.getItem('svc-lang'); } catch (e) { return null; } },
-  set(v) { try { localStorage.setItem('svc-lang', v); } catch (e) { /* 저장이 안 되는 환경 */ } },
-};
-const urlLang = new URLSearchParams(location.search).get('lang');
-let lang = (urlLang === 'vi' || urlLang === 'ko') ? urlLang : (pref.get() === 'vi' ? 'vi' : 'ko');
+let lang = getLang();
 const L = () => TXT[lang];
 
 function applyLang() {
   const t = L();
-  document.documentElement.lang = lang;
   document.title = t.title;
   document.querySelectorAll('[data-t]').forEach(el => { const v = t[el.dataset.t]; if (typeof v === 'string') el.textContent = v; });
   document.querySelectorAll('[data-ph]').forEach(el => { el.placeholder = t[el.dataset.ph]; });
@@ -120,14 +125,14 @@ function applyLang() {
     if (!o.value) o.textContent = t.majorPick;
     else o.textContent = lang === 'vi' ? `${o.value} (${MAJOR_VI[o.value]})` : o.value;
   }
-  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+  const ul = $('privacy-list');
+  ul.innerHTML = '';
+  for (const [k, v] of t.privacy) { const li = document.createElement('li'); const b = document.createElement('b'); b.textContent = k; li.append(b, ' ', v); ul.appendChild(li); }
   for (const id of ['enter-err', 'up-err']) $(id).textContent = '';
   if (student) fillWho();
   if (last && !$('step-result').hidden) render(last.file, last.r, last.server, true);
 }
-document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => {
-  lang = b.dataset.lang; pref.set(lang); applyLang();
-}));
+onLang(v => { lang = v; applyLang(); });
 
 const store = {
   get() { try { return JSON.parse(sessionStorage.getItem('svc-student') || 'null'); } catch (e) { return null; } },

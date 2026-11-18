@@ -1,5 +1,10 @@
 import { API_URL } from './config.js';
 import { summarize, CATS } from './rules.js';
+import { getLang, onLang } from './shell.js';
+
+// 교수 현황은 한국어로만 보여 준다. 베트남어를 고른 채 들어오면 한 줄로 알린다.
+const koOnly = () => { const el = document.querySelector('[data-a="koOnly"]'); if (el) el.hidden = getLang() !== 'vi'; };
+onLang(koOnly); koOnly();
 
 const $ = id => document.getElementById(id);
 let PW = '';
